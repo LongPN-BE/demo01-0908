@@ -1,33 +1,30 @@
 package com.longpn.beheroku01.api;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.longpn.beheroku01.model.Contact;
-import com.longpn.beheroku01.service.ContactService;
+import com.longpn.beheroku01.entity.Contact;
+import com.longpn.beheroku01.repository.ContactRepository;
 
+import javax.validation.Valid;
+
+@CrossOrigin
 @RestController
 @RequestMapping("/api")
-public class RestApiController {
-    public static Logger logger = LoggerFactory.getLogger(RestApiController.class);
+public class ContactController {
+    public static Logger logger = LoggerFactory.getLogger(ContactController.class);
 
     @Autowired
-    ContactService contactService;
+    ContactRepository contactRepository;
 
     @RequestMapping(value = "/contact/", method = RequestMethod.GET)
     public ResponseEntity<List<Contact>> listAllContact(){
-        List<Contact> listContact= contactService.findAll();
+        List<Contact> listContact= contactRepository.findAll();
         if(listContact.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
@@ -35,8 +32,8 @@ public class RestApiController {
     }
 
     @RequestMapping(value = "/contact/{id}", method = RequestMethod.GET)
-    public Contact findContact(@PathVariable("id") long id) {
-        Contact contact= contactService.getOne(id);
+    public Contact findContact(@PathVariable("idContact")  long id) {
+        Contact contact= contactRepository.getOne(id);
         if(contact == null) {
             ResponseEntity.notFound().build();
         }
@@ -45,31 +42,31 @@ public class RestApiController {
 
     @RequestMapping(value = "/contact/", method = RequestMethod.POST)
     public Contact saveContact(@Valid @RequestBody Contact contact) {
-        return contactService.save(contact);
+        return contactRepository.save(contact);
     }
 
     @RequestMapping(value = "/contact/", method = RequestMethod.PUT)
-    public ResponseEntity<Contact> updateContact(@PathVariable(value = "id") Long contactId,
+    public ResponseEntity<Contact> updateContact(@PathVariable(value = "idContact") long contactId,
                                                  @Valid @RequestBody Contact contactForm) {
-        Contact contact = contactService.getOne(contactId);
+        Contact contact = contactRepository.getOne(contactId);
         if(contact == null) {
             return ResponseEntity.notFound().build();
         }
         contact.setName(contactForm.getName());
         contact.setAge(contactForm.getAge());
 
-        Contact updatedContact = contactService.save(contact);
+        Contact updatedContact = contactRepository.save(contact);
         return ResponseEntity.ok(updatedContact);
     }
 
     @RequestMapping(value = "/contact/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Contact> deleteContact(@PathVariable(value = "id") Long id) {
-        Contact contact = contactService.getOne(id);
+    public ResponseEntity<Contact> deleteContact(@PathVariable(value = "idContact") long id) {
+        Contact contact = contactRepository.getOne(id);
         if(contact == null) {
             return ResponseEntity.notFound().build();
         }
 
-        contactService.delete(contact);
+        contactRepository.delete(contact);
         return ResponseEntity.ok().build();
     }
 }
